@@ -3,15 +3,17 @@ import { Header } from './components/Header'
 import { NewsCard } from './components/NewsCard'
 import { AISummary } from './components/AISummary'
 import { HotKeywords } from './components/HotKeywords'
+import { SourceManager } from './components/sources'
 import { searchNews, getHotKeywords } from './services/newsService'
 import { NewsItem, SearchResult } from './types/news'
-import { Search, Sparkles } from 'lucide-react'
+import { Search, Sparkles, Settings2 } from 'lucide-react'
 
 function App() {
   const [latestNews, setLatestNews] = useState<NewsItem[]>([])
   const [searchResult, setSearchResult] = useState<SearchResult | null>(null)
   const [isSearching, setIsSearching] = useState(false)
   const [hotKeywords] = useState<string[]>(getHotKeywords())
+  const [showSourceManager, setShowSourceManager] = useState(false)
 
   const handleSearch = async (keyword: string) => {
     setIsSearching(true)
@@ -121,9 +123,24 @@ function App() {
               <p>资讯聚合平台 · 智能新闻助手</p>
               <p className="mt-1">© 2024 All Rights Reserved</p>
             </div>
+
+            {/* 源管理入口 */}
+            <button
+              onClick={() => setShowSourceManager(true)}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-card hover:bg-accent rounded-xl border transition-colors"
+            >
+              <Settings2 size={18} className="text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">管理新闻源</span>
+            </button>
           </aside>
         </div>
       </main>
+
+      {/* 源管理弹窗 */}
+      <SourceManager
+        isOpen={showSourceManager}
+        onClose={() => setShowSourceManager(false)}
+      />
     </div>
   )
 }

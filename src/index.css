@@ -122,6 +122,20 @@ h1, h2, h3, h4, h5, h6 {
   @apply w-full px-4 py-3 rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all;
 }
 
+/* 通用输入框 */
+.input {
+  @apply w-full px-3 py-2 rounded-lg border border-border bg-white text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm;
+}
+
+select.input {
+  @apply cursor-pointer;
+}
+
+/* 卡片样式 */
+.card {
+  @apply bg-card rounded-xl border border-border shadow-sm;
+}
+
 /* 按钮样式 */
 .btn-primary {
   @apply inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-all;
@@ -142,6 +156,19 @@ h1, h2, h3, h4, h5, h6 {
 
 .btn-secondary:hover {
   background-color: hsl(var(--secondary) / 0.9);
+}
+
+/* 通用按钮 */
+.btn {
+  @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all text-sm;
+}
+
+.btn.btn-primary {
+  @apply bg-blue-600 text-white hover:bg-blue-700;
+}
+
+.btn.btn-secondary {
+  @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
 }
 
 /* 动画加载效果 */
