@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Header } from './components/Header'
 import { NewsCard } from './components/NewsCard'
 import { AISummary } from './components/AISummary'
 import { HotKeywords } from './components/HotKeywords'
-import { searchNews, getLatestNews, getHotKeywords } from './services/newsService'
+import { searchNews, getHotKeywords } from './services/newsService'
 import { NewsItem, SearchResult } from './types/news'
-import { Newspaper, Search, Sparkles } from 'lucide-react'
+import { Search, Sparkles } from 'lucide-react'
 
 function App() {
   const [latestNews, setLatestNews] = useState<NewsItem[]>([])
@@ -13,17 +13,15 @@ function App() {
   const [isSearching, setIsSearching] = useState(false)
   const [hotKeywords] = useState<string[]>(getHotKeywords())
 
-  useEffect(() => {
-    setLatestNews(getLatestNews())
-  }, [])
-
   const handleSearch = async (keyword: string) => {
     setIsSearching(true)
     setSearchResult(null)
-    
+    setLatestNews([])
+
     try {
       const result = await searchNews(keyword)
       setSearchResult(result)
+      setLatestNews(result.news)
     } catch (error) {
       console.error('搜索失败:', error)
     } finally {
@@ -34,7 +32,7 @@ function App() {
   return (
     <div className="min-h-screen bg-background">
       <Header onSearch={handleSearch} isSearching={isSearching} />
-      
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid lg:grid-cols-4 gap-8">
           {/* 主内容区 */}
@@ -43,18 +41,11 @@ function App() {
             {(isSearching || searchResult) && (
               <section className="animate-fade-in">
                 {isSearching ? (
-                  <AISummary 
-                    summary="" 
-                    keyword="搜索中" 
-                    isLoading={true} 
-                  />
+                  <AISummary summary="" keyword="搜索中" isLoading={true} />
                 ) : searchResult && (
                   <>
-                    <AISummary 
-                      summary={searchResult.aiSummary} 
-                      keyword={searchResult.keyword} 
-                    />
-                    
+                    <AISummary summary={searchResult.aiSummary} keyword={searchResult.keyword} />
+
                     {/* 搜索结果列表 */}
                     <div className="mt-6">
                       <div className="flex items-center gap-2 mb-4">
@@ -66,7 +57,7 @@ function App() {
                           共 {searchResult.news.length} 条
                         </span>
                       </div>
-                      
+
                       <div className="grid sm:grid-cols-2 gap-4">
                         {searchResult.news.map(news => (
                           <NewsCard key={news.id} news={news} />
@@ -78,26 +69,17 @@ function App() {
               </section>
             )}
 
-            {/* 最新资讯 */}
+            {/* 默认展示 */}
             {!searchResult && !isSearching && (
               <section>
                 <div className="flex items-center gap-2 mb-6">
-                  <Newspaper className="w-6 h-6 text-primary" />
-                  <h2 className="font-serif text-xl font-bold text-foreground">今日要闻</h2>
+                  <Sparkles className="w-6 h-6 text-primary" />
+                  <h2 className="font-serif text-xl font-bold text-foreground">
+                    输入描述生成新闻早报
+                  </h2>
                 </div>
-                
-                {/* 头条新闻 */}
-                {latestNews[0] && (
-                  <div className="mb-6">
-                    <NewsCard news={latestNews[0]} featured={true} />
-                  </div>
-                )}
-                
-                {/* 新闻列表 */}
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {latestNews.slice(1).map(news => (
-                    <NewsCard key={news.id} news={news} />
-                  ))}
+                <div className="bg-card rounded-xl p-6 text-muted-foreground">
+                  请输入你关心的主题或描述，系统会解析意图并自动搜索新闻生成摘要。
                 </div>
               </section>
             )}
@@ -106,12 +88,12 @@ function App() {
           {/* 侧边栏 */}
           <aside className="space-y-6">
             {/* 热门关键词 */}
-            <HotKeywords 
-              keywords={hotKeywords} 
+            <HotKeywords
+              keywords={hotKeywords}
               onKeywordClick={handleSearch}
               currentKeyword={searchResult?.keyword}
             />
-            
+
             {/* AI助手提示 */}
             <div className="bg-gradient-to-br from-primary/5 to-secondary/5 rounded-xl p-5 border border-primary/10">
               <div className="flex items-center gap-2 mb-3">
@@ -119,7 +101,7 @@ function App() {
                 <h3 className="font-serif font-bold text-foreground">AI 智能助手</h3>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                输入任意关键词，AI 将为您搜索相关资讯并生成智能摘要，助您快速掌握核心信息。
+                输入任意描述，AI 将解析意图，聚合多来源资讯并输出新闻早报。
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {['人工智能', '经济', '科技'].map(tag => (

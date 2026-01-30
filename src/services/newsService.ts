@@ -1,193 +1,46 @@
 import { NewsItem, SearchResult } from '../types/news'
 
-// 模拟新闻数据
-const mockNewsData: NewsItem[] = [
-  {
-    id: '1',
-    title: 'OpenAI发布GPT-5：AI能力实现质的飞跃',
-    summary: 'OpenAI今日正式发布GPT-5模型，在推理能力、多模态理解和代码生成方面取得重大突破，被业界称为"通用人工智能的曙光"。',
-    content: 'OpenAI今日正式发布了备受期待的GPT-5模型。这款新模型在多个维度上展现出了令人惊叹的能力提升...',
-    source: '科技日报',
-    author: '张明',
-    category: 'tech',
-    imageUrl: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&h=400&fit=crop',
-    publishedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    url: '#',
-    keywords: ['人工智能', 'GPT-5', 'OpenAI', '大模型'],
-  },
-  {
-    id: '2',
-    title: '中国新能源汽车出口量连续三个月创新高',
-    summary: '据海关总署最新数据，中国新能源汽车出口量在2024年前三个月连续创下历史新高，成为全球最大的新能源汽车出口国。',
-    content: '海关总署今日发布的数据显示，中国新能源汽车出口继续保持强劲增长态势...',
-    source: '经济观察报',
-    author: '李华',
-    category: 'finance',
-    imageUrl: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=600&h=400&fit=crop',
-    publishedAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-    url: '#',
-    keywords: ['新能源', '汽车', '出口', '经济'],
-  },
-  {
-    id: '3',
-    title: '全国高考改革新政策：取消文理分科正式实施',
-    summary: '教育部宣布，2024年起全国统一实施新高考改革，取消传统文理分科，采用"3+1+2"模式，给予学生更多选择空间。',
-    content: '教育部今日召开新闻发布会，宣布新高考改革政策将于2024年秋季学期起全面实施...',
-    source: '人民教育',
-    author: '王芳',
-    category: 'society',
-    imageUrl: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600&h=400&fit=crop',
-    publishedAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
-    url: '#',
-    keywords: ['高考', '教育改革', '政策'],
-  },
-  {
-    id: '4',
-    title: '苹果Vision Pro正式在中国大陆发售',
-    summary: '苹果公司宣布Vision Pro头显设备今日起在中国大陆地区正式开售，首批用户已开始体验这款革命性的空间计算设备。',
-    content: '经过数月的等待，苹果Vision Pro终于在中国大陆市场正式发售...',
-    source: '数码前沿',
-    author: '陈刚',
-    category: 'tech',
-    imageUrl: 'https://images.unsplash.com/photo-1622979135225-d2ba269cf1ac?w=600&h=400&fit=crop',
-    publishedAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
-    url: '#',
-    keywords: ['苹果', 'Vision Pro', 'AR', 'VR'],
-  },
-  {
-    id: '5',
-    title: '央行宣布降准0.5个百分点 释放万亿流动性',
-    summary: '中国人民银行宣布下调金融机构存款准备金率0.5个百分点，预计将释放长期资金约1万亿元，支持实体经济发展。',
-    content: '中国人民银行今日发布公告，决定于下月初下调金融机构存款准备金率...',
-    source: '财经头条',
-    author: '刘强',
-    category: 'finance',
-    imageUrl: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&h=400&fit=crop',
-    publishedAt: new Date(Date.now() - 10 * 60 * 60 * 1000).toISOString(),
-    url: '#',
-    keywords: ['央行', '降准', '货币政策', '经济'],
-  },
-  {
-    id: '6',
-    title: '国产大飞机C919开通北京至上海航线',
-    summary: '中国商飞公司宣布，国产大型客机C919正式开通北京至上海商业航线，标志着国产大飞机商业运营进入新阶段。',
-    content: '今日上午，首架C919执飞的北京至上海航班从北京大兴机场顺利起飞...',
-    source: '航空周刊',
-    author: '赵明',
-    category: 'tech',
-    imageUrl: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=600&h=400&fit=crop',
-    publishedAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-    url: '#',
-    keywords: ['C919', '国产大飞机', '航空'],
-  },
-  {
-    id: '7',
-    title: '春节档电影票房突破80亿 创历史新高',
-    summary: '据国家电影局统计，2024年春节档电影总票房已突破80亿元，刷新中国影史春节档票房纪录，观影人次超1.6亿。',
-    content: '2024年春节档电影市场迎来开门红，多部国产影片表现亮眼...',
-    source: '娱乐在线',
-    author: '林小红',
-    category: 'entertainment',
-    imageUrl: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=600&h=400&fit=crop',
-    publishedAt: new Date(Date.now() - 14 * 60 * 60 * 1000).toISOString(),
-    url: '#',
-    keywords: ['春节档', '电影', '票房'],
-  },
-  {
-    id: '8',
-    title: '量子计算机实现258量子比特运算突破',
-    summary: '中科院量子信息实验室宣布成功研制258量子比特可编程量子计算机，在量子纠错和量子算法方面取得重要进展。',
-    content: '中国科学院量子信息实验室今日宣布了一项重大突破...',
-    source: '科技前沿',
-    author: '周博士',
-    category: 'tech',
-    imageUrl: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=600&h=400&fit=crop',
-    publishedAt: new Date(Date.now() - 16 * 60 * 60 * 1000).toISOString(),
-    url: '#',
-    keywords: ['量子计算', '量子比特', '科技突破'],
-  },
-]
-
-// 模拟AI总结
-const generateAISummary = (keyword: string, news: NewsItem[]): string => {
-  const summaries: Record<string, string> = {
-    '人工智能': `📊 今日AI领域要闻综述：
-
-1. **技术突破**：GPT-5模型正式发布，在推理能力和多模态理解方面实现重大飞跃，被认为是迈向通用人工智能的重要一步。
-
-2. **产业动态**：多家科技巨头加大AI研发投入，国内外AI初创企业融资活跃，行业竞争进一步加剧。
-
-3. **应用落地**：AI在医疗诊断、自动驾驶、智能制造等领域的应用持续深化，商业化进程加速。
-
-💡 核心观点：当前AI技术正处于从"可用"到"好用"的关键转型期，预计未来12个月将有更多突破性应用落地。`,
-    
-    '经济': `📈 今日财经资讯摘要：
-
-1. **货币政策**：央行宣布降准0.5个百分点，释放约万亿流动性，旨在支持实体经济平稳发展。
-
-2. **外贸增长**：新能源汽车出口持续创新高，中国制造业在全球供应链中的地位进一步巩固。
-
-3. **消费市场**：春节档票房突破历史记录，显示国内消费市场韧性强劲，居民消费信心逐步恢复。
-
-💡 核心观点：多项政策组合拳持续发力，经济基本面稳中向好，市场预期逐步改善。`,
-    
-    '科技': `🔬 今日科技资讯汇总：
-
-1. **AI领域**：GPT-5发布引发行业震动，大模型技术迭代加速，国产大模型也在快速追赶。
-
-2. **消费电子**：苹果Vision Pro在中国发售，空间计算时代正式开启，XR设备市场竞争加剧。
-
-3. **航空航天**：C919开通新航线，国产大飞机商业化运营稳步推进。
-
-4. **量子计算**：258量子比特突破展现中国在量子领域的技术实力。
-
-💡 核心观点：科技创新正成为推动经济高质量发展的核心引擎，关键技术自主可控取得积极进展。`,
+type BriefingResponse = {
+  intent: {
+    query: string
+    categories: string[]
+    timeRange: string
+    language: string
+    region: string
+    keywords: string[]
   }
-  
-  return summaries[keyword] || `📋 关于"${keyword}"的资讯总结：
-
-今日共收集到 ${news.length} 条相关新闻。主要涉及以下方面：
-
-${news.slice(0, 3).map((n, i) => `${i + 1}. ${n.title}`).join('\n')}
-
-💡 建议持续关注该领域的最新动态，以获取更全面的信息。`
+  news: NewsItem[]
+  briefing: string
+  searchedAt: string
 }
 
-// 模拟搜索延迟
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
-
 export async function searchNews(keyword: string): Promise<SearchResult> {
-  await delay(1500) // 模拟API请求延迟
-  
-  const lowercaseKeyword = keyword.toLowerCase()
-  
-  // 根据关键词过滤新闻
-  let filteredNews = mockNewsData.filter(news => 
-    news.title.toLowerCase().includes(lowercaseKeyword) ||
-    news.summary.toLowerCase().includes(lowercaseKeyword) ||
-    news.keywords.some(k => k.toLowerCase().includes(lowercaseKeyword)) ||
-    news.category.toLowerCase().includes(lowercaseKeyword)
-  )
-  
-  // 如果没有精确匹配，返回部分随机新闻
-  if (filteredNews.length === 0) {
-    filteredNews = mockNewsData.slice(0, 4)
+  const res = await fetch('/api/briefing', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query: keyword }),
+  })
+
+  if (!res.ok) {
+    throw new Error('failed to fetch briefing')
   }
-  
+
+  const data: BriefingResponse = await res.json()
+
   return {
-    keyword,
-    news: filteredNews,
-    aiSummary: generateAISummary(keyword, filteredNews),
-    searchedAt: new Date().toISOString(),
+    keyword: data.intent.query || keyword,
+    news: data.news,
+    aiSummary: data.briefing,
+    searchedAt: data.searchedAt,
   }
 }
 
 export function getLatestNews(): NewsItem[] {
-  return mockNewsData
+  return []
 }
 
-export function getNewsByCategory(category: string): NewsItem[] {
-  return mockNewsData.filter(news => news.category === category)
+export function getNewsByCategory(_category: string): NewsItem[] {
+  return []
 }
 
 export function getHotKeywords(): string[] {
