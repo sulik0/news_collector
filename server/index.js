@@ -20,8 +20,23 @@ app.get('/api/health', (_req, res) => {
   res.json({ ok: true })
 })
 
+// 检查 LLM API Key 是否配置
+function checkLLMConfig() {
+  const apiKey = process.env.LLM_API_KEY || process.env.GLM_API_KEY
+  return !!apiKey
+}
+
 app.post('/api/briefing', async (req, res) => {
   try {
+    // 检查 API Key 配置
+    if (!checkLLMConfig()) {
+      return res.status(503).json({
+        error: 'LLM 服务未配置',
+        message: '请在 server/.env 文件中配置 LLM_API_KEY',
+        hint: '获取 API Key: https://open.bigmodel.cn'
+      })
+    }
+
     const userInput = String(req.body?.query || '').trim()
     if (!userInput) {
       return res.status(400).json({ error: 'query is required' })
