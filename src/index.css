@@ -1,0 +1,157 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* 新闻门户配色 - 经典红蓝搭配 */
+  --primary: 0 72% 51%;           /* 红色主色调 */
+  --primary-foreground: 0 0% 100%;
+  
+  --secondary: 215 60% 45%;       /* 蓝色辅助色 */
+  --secondary-foreground: 0 0% 100%;
+  
+  --accent: 32 95% 52%;           /* 橙色强调色 */
+  --accent-foreground: 0 0% 100%;
+  
+  --background: 0 0% 97%;         /* 浅灰背景 */
+  --foreground: 0 0% 12%;         /* 深色文字 */
+  
+  --muted: 0 0% 94%;
+  --muted-foreground: 0 0% 45%;
+  
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 12%;
+  
+  --border: 0 0% 90%;
+  
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* 标题字体 */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Noto Serif SC', serif;
+  font-weight: 600;
+}
+
+/* 卡片悬浮效果 */
+.news-card {
+  transition: all 0.25s ease;
+}
+
+.news-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.12);
+}
+
+/* 渐变文字 */
+.gradient-text {
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* 标签样式 */
+.tag {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors;
+}
+
+.tag-tech {
+  background-color: hsl(var(--secondary) / 0.1);
+  color: hsl(var(--secondary));
+}
+
+.tag-finance {
+  background-color: hsl(var(--accent) / 0.1);
+  color: hsl(var(--accent));
+}
+
+.tag-society {
+  background-color: hsl(var(--primary) / 0.1);
+  color: hsl(var(--primary));
+}
+
+.tag-entertainment {
+  background-color: hsl(280 60% 50% / 0.1);
+  color: hsl(280 60% 50%);
+}
+
+/* AI总结区域样式 */
+.ai-summary {
+  background: linear-gradient(135deg, hsl(var(--secondary) / 0.05), hsl(var(--primary) / 0.05));
+  border-left: 3px solid hsl(var(--secondary));
+}
+
+/* 搜索输入框 */
+.search-input {
+  @apply w-full px-4 py-3 rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all;
+}
+
+/* 按钮样式 */
+.btn-primary {
+  @apply inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-all;
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.btn-primary:hover {
+  background-color: hsl(var(--primary) / 0.9);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all;
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+}
+
+.btn-secondary:hover {
+  background-color: hsl(var(--secondary) / 0.9);
+}
+
+/* 动画加载效果 */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--muted) / 0.7) 50%, hsl(var(--muted)) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
