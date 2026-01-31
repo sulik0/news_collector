@@ -152,23 +152,48 @@ app.post('/api/briefing', async (req, res) => {
     const customSources = await sourceService.getEnabledSources()
 
     // 并行查询所有源（内置 + 自定义）
-    const [builtinResults, customResults] = await Promise.all([
-      // 内置源
-      Promise.all([
-        searchNewsAPI(searchPayload),
-        searchGNews(searchPayload),
-        searchBingNews(searchPayload),
-      ]),
-      // 自定义源
-      Promise.all(
-        customSources.map(source => fetchCustomSource(source, searchPayload))
-      )
-    ])
+    const builtinProviders = [
+      { name: 'newsapi', run: () => searchNewsAPI(searchPayload) },
+      { name: 'gnews', run: () => searchGNews(searchPayload) },
+      { name: 'bing', run: () => searchBingNews(searchPayload) },
+    ]
+
+    const builtinResults = await Promise.allSettled(
+      builtinProviders.map(async (provider) => {
+        try {
+          return await provider.run()
+        } catch (error) {
+          console.warn(`Provider failed: ${provider.name}`, error?.message || error)
+          return []
+        }
+      })
+    )
+
+    const customResults = await Promise.allSettled(
+      customSources.map(async (source) => {
+        try {
+          return await fetchCustomSource(source, searchPayload)
+        } catch (error) {
+          console.warn(`Custom source failed: ${source.name || source.id}`, error?.message || error)
+          return []
+        }
+      })
+    )
+
+    const flattenedBuiltin = builtinResults
+      .filter((result) => result.status === 'fulfilled')
+      .map((result) => result.value)
+      .flat()
+
+    const flattenedCustom = customResults
+      .filter((result) => result.status === 'fulfilled')
+      .map((result) => result.value)
+      .flat()
 
     // 合并所有结果
     const combined = dedupeNews([
-      ...builtinResults.flat(),
-      ...customResults.flat()
+      ...flattenedBuiltin,
+      ...flattenedCustom
     ])
     const fallback = combined.length === 0
       ? [normalizeItem({ title: '暂无匹配新闻', description: '请调整关键词或配置新闻数据源。', url: '#', publishedAt: new Date().toISOString() }, { source: '系统', category: 'world' })]

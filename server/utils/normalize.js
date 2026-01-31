@@ -34,8 +34,14 @@ export function createId(input) {
 export function normalizeItem(item, fallback = {}) {
   const title = item.title || item.name || fallback.title || '未命名新闻'
   const url = item.url || item.link || fallback.url || '#'
-  const publishedAt = item.publishedAt || item.datePublished || item.published_at || fallback.publishedAt || new Date().toISOString()
+  const publishedAt =
+    item.publishedAt ||
+    item.datePublished ||
+    item.published_at ||
+    fallback.publishedAt ||
+    new Date().toISOString()
   const sourceName = item.source?.name || item.source || item.provider || fallback.source || '未知来源'
+  const safePublishedAt = safeToISOString(publishedAt)
 
   return {
     id: createId(`${title}-${url}`),
@@ -46,8 +52,16 @@ export function normalizeItem(item, fallback = {}) {
     author: item.author || fallback.author || sourceName,
     category: fallback.category || 'world',
     imageUrl: item.image?.thumbnail?.contentUrl || item.imageUrl || item.image || null,
-    publishedAt: new Date(publishedAt).toISOString(),
+    publishedAt: safePublishedAt,
     url,
     keywords: fallback.keywords || [],
   }
+}
+
+function safeToISOString(value) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) {
+    return new Date().toISOString()
+  }
+  return date.toISOString()
 }
