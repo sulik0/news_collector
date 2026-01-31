@@ -1,5 +1,6 @@
 import Parser from 'rss-parser'
 import { normalizeItem } from '../utils/normalize.js'
+import { buildSearchTerms, matchesTerms } from '../utils/filter.js'
 
 const parser = new Parser({
   timeout: 10000,
@@ -26,9 +27,21 @@ export async function fetchRSS(source, searchPayload = {}) {
 
   try {
     const feed = await parser.parseURL(url)
-    const items = (feed.items || []).slice(0, itemLimit)
+    const items = feed.items || []
+    const terms = buildSearchTerms(searchPayload)
+    const filtered = terms.length === 0
+      ? items
+      : items.filter((item) => {
+          const haystack = [
+            item.title,
+            item.contentSnippet,
+            item.summary,
+            item.content,
+          ].join(' ')
+          return matchesTerms(haystack, terms)
+        })
 
-    return items.map(item => {
+    return filtered.slice(0, itemLimit).map(item => {
       // 尝试提取图片
       let imageUrl = null
       if (item.enclosure?.url && item.enclosure.type?.startsWith('image')) {

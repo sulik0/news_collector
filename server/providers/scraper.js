@@ -1,5 +1,6 @@
 import * as cheerio from 'cheerio'
 import { normalizeItem } from '../utils/normalize.js'
+import { buildSearchTerms, matchesTerms } from '../utils/filter.js'
 
 export async function fetchScraper(source, searchPayload = {}) {
   const { url, selectors, baseUrl } = source.config || {}
@@ -26,6 +27,7 @@ export async function fetchScraper(source, searchPayload = {}) {
     const html = await res.text()
     const $ = cheerio.load(html)
     const items = []
+    const terms = buildSearchTerms(searchPayload)
 
     // 解析基础 URL
     const resolveUrl = (href) => {
@@ -84,6 +86,9 @@ export async function fetchScraper(source, searchPayload = {}) {
           imageUrl = resolveUrl(imageUrl)
         }
       }
+
+      const haystack = `${title} ${summary || ''}`
+      if (!matchesTerms(haystack, terms)) return
 
       items.push(normalizeItem({
         title,

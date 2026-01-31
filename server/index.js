@@ -11,6 +11,7 @@ import { searchBingNews } from './providers/bing.js'
 import { fetchRSS } from './providers/rss.js'
 import { fetchScraper } from './providers/scraper.js'
 import { fetchWechat } from './providers/wechat.js'
+import { getDailyKeywords, buildTrendingKeywords } from './utils/keywords.js'
 import * as sourceService from './services/sourceService.js'
 import { buildIntentPrompt, buildSummaryPrompt } from './prompts.js'
 
@@ -20,8 +21,59 @@ const app = express()
 app.use(cors())
 app.use(express.json({ limit: '1mb' }))
 
+const keywordCache = {
+  date: '',
+  keywords: [],
+}
+
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true })
+})
+
+// 今日关键词
+app.get('/api/keywords', async (_req, res) => {
+  const today = new Date().toISOString().slice(0, 10)
+  if (keywordCache.date === today && keywordCache.keywords.length > 0) {
+    return res.json({ date: keywordCache.date, keywords: keywordCache.keywords })
+  }
+
+  try {
+    const customSources = await sourceService.getEnabledSources()
+    const results = await Promise.allSettled(
+      customSources.map(async (source) => {
+        try {
+          return await fetchCustomSource(source, { keywords: [] })
+        } catch (error) {
+          console.warn(`Keywords source failed: ${source.name || source.id}`, error?.message || error)
+          return []
+        }
+      })
+    )
+
+    const items = results
+      .filter((result) => result.status === 'fulfilled')
+      .map((result) => result.value)
+      .flat()
+      .slice(0, 120)
+
+    const keywords = buildTrendingKeywords(items, 8)
+    if (keywords.length === 0) {
+      const fallback = getDailyKeywords()
+      keywordCache.date = fallback.date
+      keywordCache.keywords = fallback.keywords
+    } else {
+      keywordCache.date = today
+      keywordCache.keywords = keywords
+    }
+
+    return res.json({ date: keywordCache.date, keywords: keywordCache.keywords })
+  } catch (error) {
+    console.error('Failed to build keywords:', error)
+    const fallback = getDailyKeywords()
+    keywordCache.date = fallback.date
+    keywordCache.keywords = fallback.keywords
+    return res.json({ date: keywordCache.date, keywords: keywordCache.keywords })
+  }
 })
 
 // ==================== 源管理 API ====================
@@ -110,9 +162,94 @@ function checkLLMConfig() {
   return !!apiKey
 }
 
+async function generateBriefing(userInput, onStage) {
+  onStage?.({ stage: 'intent', label: '解析意图', progress: 0.2 })
+  const intentMessages = buildIntentPrompt(userInput)
+  const intentText = await chatCompletion({ messages: intentMessages, temperature: 0.2 })
+  const intent =
+    safeJsonParse(intentText) ||
+    {
+      query: userInput,
+      categories: [],
+      timeRange: '7d',
+      language: 'zh',
+      region: 'CN',
+      keywords: [],
+    }
+
+  const searchPayload = {
+    query: intent.query || userInput,
+    categories: intent.categories || [],
+    timeRange: intent.timeRange || '7d',
+    language: intent.language || 'zh',
+    region: intent.region || 'CN',
+    keywords: intent.keywords || [],
+  }
+
+  onStage?.({ stage: 'sources', label: '抓取资讯', progress: 0.55 })
+  const customSources = await sourceService.getEnabledSources()
+
+  const builtinProviders = [
+    { name: 'newsapi', run: () => searchNewsAPI(searchPayload) },
+    { name: 'gnews', run: () => searchGNews(searchPayload) },
+    { name: 'bing', run: () => searchBingNews(searchPayload) },
+  ]
+
+  const builtinResults = await Promise.allSettled(
+    builtinProviders.map(async (provider) => {
+      try {
+        return await provider.run()
+      } catch (error) {
+        console.warn(`Provider failed: ${provider.name}`, error?.message || error)
+        return []
+      }
+    })
+  )
+
+  const customResults = await Promise.allSettled(
+    customSources.map(async (source) => {
+      try {
+        return await fetchCustomSource(source, searchPayload)
+      } catch (error) {
+        console.warn(`Custom source failed: ${source.name || source.id}`, error?.message || error)
+        return []
+      }
+    })
+  )
+
+  const flattenedBuiltin = builtinResults
+    .filter((result) => result.status === 'fulfilled')
+    .map((result) => result.value)
+    .flat()
+
+  const flattenedCustom = customResults
+    .filter((result) => result.status === 'fulfilled')
+    .map((result) => result.value)
+    .flat()
+
+  onStage?.({ stage: 'dedupe', label: '去重整理', progress: 0.75 })
+  const combined = dedupeNews([
+    ...flattenedBuiltin,
+    ...flattenedCustom
+  ])
+  const fallback = combined.length === 0
+    ? [normalizeItem({ title: '暂无匹配新闻', description: '请调整关键词或配置新闻数据源。', url: '#', publishedAt: new Date().toISOString() }, { source: '系统', category: 'world' })]
+    : combined
+
+  onStage?.({ stage: 'summary', label: '生成简报', progress: 0.9 })
+  const summaryMessages = buildSummaryPrompt(searchPayload, fallback)
+  const summaryText = await chatCompletion({ messages: summaryMessages, temperature: 0.3 })
+
+  return {
+    intent: searchPayload,
+    news: fallback,
+    briefing: summaryText,
+    searchedAt: new Date().toISOString(),
+  }
+}
+
 app.post('/api/briefing', async (req, res) => {
   try {
-    // 检查 API Key 配置
     if (!checkLLMConfig()) {
       return res.status(503).json({
         error: 'LLM 服务未配置',
@@ -126,91 +263,62 @@ app.post('/api/briefing', async (req, res) => {
       return res.status(400).json({ error: 'query is required' })
     }
 
-    const intentMessages = buildIntentPrompt(userInput)
-    const intentText = await chatCompletion({ messages: intentMessages, temperature: 0.2 })
-    const intent =
-      safeJsonParse(intentText) ||
-      {
-        query: userInput,
-        categories: [],
-        timeRange: '7d',
-        language: 'zh',
-        region: 'CN',
-        keywords: [],
-      }
-
-    const searchPayload = {
-      query: intent.query || userInput,
-      categories: intent.categories || [],
-      timeRange: intent.timeRange || '7d',
-      language: intent.language || 'zh',
-      region: intent.region || 'CN',
-      keywords: intent.keywords || [],
-    }
-
-    // 获取启用的自定义源
-    const customSources = await sourceService.getEnabledSources()
-
-    // 并行查询所有源（内置 + 自定义）
-    const builtinProviders = [
-      { name: 'newsapi', run: () => searchNewsAPI(searchPayload) },
-      { name: 'gnews', run: () => searchGNews(searchPayload) },
-      { name: 'bing', run: () => searchBingNews(searchPayload) },
-    ]
-
-    const builtinResults = await Promise.allSettled(
-      builtinProviders.map(async (provider) => {
-        try {
-          return await provider.run()
-        } catch (error) {
-          console.warn(`Provider failed: ${provider.name}`, error?.message || error)
-          return []
-        }
-      })
-    )
-
-    const customResults = await Promise.allSettled(
-      customSources.map(async (source) => {
-        try {
-          return await fetchCustomSource(source, searchPayload)
-        } catch (error) {
-          console.warn(`Custom source failed: ${source.name || source.id}`, error?.message || error)
-          return []
-        }
-      })
-    )
-
-    const flattenedBuiltin = builtinResults
-      .filter((result) => result.status === 'fulfilled')
-      .map((result) => result.value)
-      .flat()
-
-    const flattenedCustom = customResults
-      .filter((result) => result.status === 'fulfilled')
-      .map((result) => result.value)
-      .flat()
-
-    // 合并所有结果
-    const combined = dedupeNews([
-      ...flattenedBuiltin,
-      ...flattenedCustom
-    ])
-    const fallback = combined.length === 0
-      ? [normalizeItem({ title: '暂无匹配新闻', description: '请调整关键词或配置新闻数据源。', url: '#', publishedAt: new Date().toISOString() }, { source: '系统', category: 'world' })]
-      : combined
-
-    const summaryMessages = buildSummaryPrompt(searchPayload, fallback)
-    const summaryText = await chatCompletion({ messages: summaryMessages, temperature: 0.3 })
-
-    res.json({
-      intent: searchPayload,
-      news: fallback,
-      briefing: summaryText,
-      searchedAt: new Date().toISOString(),
-    })
+    const result = await generateBriefing(userInput)
+    res.json(result)
   } catch (error) {
     console.error(error)
     res.status(500).json({ error: 'failed to generate briefing' })
+  }
+})
+
+app.get('/api/briefing/stream', async (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream')
+  res.setHeader('Cache-Control', 'no-cache')
+  res.setHeader('Connection', 'keep-alive')
+  res.flushHeaders?.()
+
+  const sendEvent = (event, data) => {
+    res.write(`event: ${event}\n`)
+    res.write(`data: ${JSON.stringify(data)}\n\n`)
+  }
+
+  if (!checkLLMConfig()) {
+    sendEvent('server-error', {
+      error: 'LLM 服务未配置',
+      message: '请在 server/.env 文件中配置 LLM_API_KEY',
+      hint: '获取 API Key: https://open.bigmodel.cn'
+    })
+    res.end()
+    return
+  }
+
+  const userInput = String(req.query?.query || '').trim()
+  if (!userInput) {
+    sendEvent('server-error', { error: 'query is required' })
+    res.end()
+    return
+  }
+
+  let closed = false
+  req.on('close', () => {
+    closed = true
+  })
+
+  try {
+    const result = await generateBriefing(userInput, (stage) => {
+      if (!closed) sendEvent('stage', stage)
+    })
+
+    if (!closed) {
+      sendEvent('done', result)
+      res.end()
+    }
+  } catch (error) {
+    if (!closed) {
+      console.error(error)
+      sendEvent('server-error', { error: 'failed to generate briefing' })
+      res.end()
+    }
   }
 })
 

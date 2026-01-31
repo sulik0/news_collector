@@ -3,28 +3,28 @@
 @tailwind utilities;
 
 :root {
-  /* 新闻门户配色 - 经典红蓝搭配 */
-  --primary: 0 72% 51%;           /* 红色主色调 */
+  /* Newsroom 2.0 - 琥珀 + 海盐蓝 */
+  --primary: 16 82% 52%;
   --primary-foreground: 0 0% 100%;
-  
-  --secondary: 215 60% 45%;       /* 蓝色辅助色 */
+
+  --secondary: 198 62% 43%;
   --secondary-foreground: 0 0% 100%;
-  
-  --accent: 32 95% 52%;           /* 橙色强调色 */
+
+  --accent: 38 90% 55%;
   --accent-foreground: 0 0% 100%;
-  
-  --background: 0 0% 97%;         /* 浅灰背景 */
-  --foreground: 0 0% 12%;         /* 深色文字 */
-  
-  --muted: 0 0% 94%;
-  --muted-foreground: 0 0% 45%;
-  
+
+  --background: 24 33% 97%;
+  --foreground: 222 18% 14%;
+
+  --muted: 24 18% 92%;
+  --muted-foreground: 219 10% 40%;
+
   --card: 0 0% 100%;
-  --card-foreground: 0 0% 12%;
-  
-  --border: 0 0% 90%;
-  
-  --destructive: 0 72% 51%;
+  --card-foreground: 222 18% 14%;
+
+  --border: 24 16% 88%;
+
+  --destructive: 0 75% 55%;
   --destructive-foreground: 0 0% 100%;
 }
 
@@ -35,7 +35,7 @@
 }
 
 body {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Space Grotesk', 'Noto Sans SC', sans-serif;
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
   line-height: 1.6;
@@ -64,8 +64,107 @@ body {
 
 /* 标题字体 */
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Noto Serif SC', serif;
+  font-family: 'ZCOOL XiaoWei', 'Noto Serif SC', serif;
   font-weight: 600;
+}
+
+.app-shell {
+  background:
+    radial-gradient(circle at 20% 10%, rgba(253, 223, 188, 0.6), transparent 45%),
+    radial-gradient(circle at 80% 0%, rgba(194, 231, 252, 0.45), transparent 40%),
+    linear-gradient(120deg, rgba(255, 255, 255, 0.9), rgba(249, 246, 242, 0.9));
+}
+
+.hero-panel {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  padding: 32px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 248, 240, 0.9));
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 24px 60px -40px rgba(16, 24, 40, 0.25);
+}
+
+.hero-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top right, rgba(255, 179, 123, 0.22), transparent 45%),
+    radial-gradient(circle at bottom left, rgba(120, 197, 229, 0.18), transparent 50%);
+  pointer-events: none;
+}
+
+.hero-grid {
+  position: relative;
+  display: grid;
+  gap: 32px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  z-index: 1;
+}
+
+.search-panel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 16px 32px -24px rgba(15, 23, 42, 0.35);
+}
+
+.keyword-chip {
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground));
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.keyword-chip:hover {
+  transform: translateY(-1px);
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary));
+  box-shadow: 0 10px 20px -16px rgba(15, 23, 42, 0.4);
+}
+
+.progress-card {
+  padding: 18px 20px;
+  border-radius: 18px;
+  border: 1px solid hsl(var(--border));
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.progress-track {
+  height: 8px;
+  background: hsl(var(--muted));
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, hsl(var(--secondary)), hsl(var(--primary)));
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.stage-pill {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--muted-foreground));
+  text-align: center;
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.stage-pill-active {
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary));
+  background: rgba(255, 237, 223, 0.9);
 }
 
 /* 卡片悬浮效果 */

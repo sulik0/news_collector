@@ -1,139 +1,198 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Header } from './components/Header'
 import { NewsCard } from './components/NewsCard'
 import { AISummary } from './components/AISummary'
-import { HotKeywords } from './components/HotKeywords'
 import { SourceManager } from './components/sources'
-import { searchNews, getHotKeywords } from './services/newsService'
-import { NewsItem, SearchResult } from './types/news'
-import { Search, Sparkles, Settings2 } from 'lucide-react'
+import { searchNewsStream, fetchDailyKeywords, getFallbackKeywords, BriefingStage } from './services/newsService'
+import { SearchResult } from './types/news'
+import { Search } from 'lucide-react'
 
 function App() {
-  const [latestNews, setLatestNews] = useState<NewsItem[]>([])
   const [searchResult, setSearchResult] = useState<SearchResult | null>(null)
   const [isSearching, setIsSearching] = useState(false)
-  const [hotKeywords] = useState<string[]>(getHotKeywords())
+  const [hotKeywords, setHotKeywords] = useState<string[]>([])
+  const [hotKeywordsDate, setHotKeywordsDate] = useState<string>('')
   const [showSourceManager, setShowSourceManager] = useState(false)
+  const [searchInput, setSearchInput] = useState('')
+  const [progressStage, setProgressStage] = useState<BriefingStage | null>(null)
+  const [progressValue, setProgressValue] = useState(0)
+  const [searchError, setSearchError] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetchDailyKeywords()
+      .then((data) => {
+        setHotKeywords(data.keywords)
+        setHotKeywordsDate(data.date)
+      })
+      .catch(() => {
+        setHotKeywords(getFallbackKeywords())
+        setHotKeywordsDate(new Date().toISOString().slice(0, 10))
+      })
+  }, [])
 
   const handleSearch = async (keyword: string) => {
     setIsSearching(true)
     setSearchResult(null)
-    setLatestNews([])
+    setSearchError(null)
+    setProgressStage({ stage: 'intent', label: '解析意图', progress: 0.2 })
+    setProgressValue(0.2)
 
     try {
-      const result = await searchNews(keyword)
+      const result = await searchNewsStream(keyword, (stage) => {
+        setProgressStage(stage)
+        setProgressValue(stage.progress)
+      })
       setSearchResult(result)
-      setLatestNews(result.news)
     } catch (error) {
       console.error('搜索失败:', error)
+      setSearchError('搜索失败，请检查服务状态或稍后重试')
     } finally {
       setIsSearching(false)
+      setProgressValue(1)
     }
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header onSearch={handleSearch} isSearching={isSearching} />
+    <div className="min-h-screen app-shell">
+      <Header
+        isSearching={isSearching}
+        showSearch={false}
+        onOpenSources={() => setShowSourceManager(true)}
+      />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid lg:grid-cols-4 gap-8">
-          {/* 主内容区 */}
-          <div className="lg:col-span-3 space-y-8">
-            {/* 搜索结果 / AI总结 */}
-            {(isSearching || searchResult) && (
-              <section className="animate-fade-in">
-                {isSearching ? (
-                  <AISummary summary="" keyword="搜索中" isLoading={true} />
-                ) : searchResult && (
-                  <>
-                    <AISummary summary={searchResult.aiSummary} keyword={searchResult.keyword} />
-
-                    {/* 搜索结果列表 */}
-                    <div className="mt-6">
-                      <div className="flex items-center gap-2 mb-4">
-                        <Search className="w-5 h-5 text-primary" />
-                        <h2 className="font-serif text-lg font-bold text-foreground">
-                          「{searchResult.keyword}」相关资讯
-                        </h2>
-                        <span className="text-sm text-muted-foreground">
-                          共 {searchResult.news.length} 条
-                        </span>
-                      </div>
-
-                      <div className="grid sm:grid-cols-2 gap-4">
-                        {searchResult.news.map(news => (
-                          <NewsCard key={news.id} news={news} />
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                )}
-              </section>
-            )}
-
-            {/* 默认展示 */}
-            {!searchResult && !isSearching && (
-              <section>
-                <div className="flex items-center gap-2 mb-6">
-                  <Sparkles className="w-6 h-6 text-primary" />
-                  <h2 className="font-serif text-xl font-bold text-foreground">
-                    输入描述生成新闻早报
-                  </h2>
-                </div>
-                <div className="bg-card rounded-xl p-6 text-muted-foreground">
-                  请输入你关心的主题或描述，系统会解析意图并自动搜索新闻生成摘要。
-                </div>
-              </section>
-            )}
-          </div>
-
-          {/* 侧边栏 */}
-          <aside className="space-y-6">
-            {/* 热门关键词 */}
-            <HotKeywords
-              keywords={hotKeywords}
-              onKeywordClick={handleSearch}
-              currentKeyword={searchResult?.keyword}
-            />
-
-            {/* AI助手提示 */}
-            <div className="bg-gradient-to-br from-primary/5 to-secondary/5 rounded-xl p-5 border border-primary/10">
-              <div className="flex items-center gap-2 mb-3">
-                <Sparkles className="w-5 h-5 text-primary" />
-                <h3 className="font-serif font-bold text-foreground">AI 智能助手</h3>
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+        <section className="hero-panel">
+          <div className="hero-grid">
+            <div className="space-y-6">
+              <div className="inline-flex items-center gap-2 text-xs font-semibold tracking-[0.3em] text-primary uppercase">
+                今日资讯
+                <span className="inline-block w-2 h-2 rounded-full bg-primary animate-pulse" />
               </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                输入任意描述，AI 将解析意图，聚合多来源资讯并输出新闻早报。
-              </p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {['人工智能', '经济', '科技'].map(tag => (
+              <div>
+                <h2 className="text-3xl md:text-4xl font-serif font-bold text-foreground leading-tight">
+                  输入主题，生成今日智能早报
+                </h2>
+                <p className="mt-3 text-muted-foreground text-base md:text-lg">
+                  聚合多来源资讯，AI 自动拆解意图并输出重点摘要。
+                </p>
+              </div>
+
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  if (searchInput.trim()) {
+                    handleSearch(searchInput.trim())
+                  }
+                }}
+                className="search-panel"
+              >
+                <Search className="w-5 h-5 text-muted-foreground" />
+                <input
+                  type="text"
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  placeholder="例如：新能源车出口趋势、AI 芯片监管..."
+                  className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
+                  disabled={isSearching}
+                />
+                <button
+                  type="submit"
+                  disabled={isSearching}
+                  className="btn-primary whitespace-nowrap"
+                >
+                  {isSearching ? '分析中...' : '生成早报'}
+                </button>
+              </form>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <span>今日关键词</span>
+                <span>{hotKeywordsDate}</span>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {hotKeywords.map((keyword) => (
                   <button
-                    key={tag}
-                    onClick={() => handleSearch(tag)}
-                    className="text-xs px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                    key={keyword}
+                    onClick={() => {
+                      setSearchInput(keyword)
+                      handleSearch(keyword)
+                    }}
+                    className="keyword-chip"
                   >
-                    试试搜索「{tag}」
+                    #{keyword}
                   </button>
                 ))}
               </div>
+              <div className="text-xs text-muted-foreground">
+                关键词每日自动刷新 · 可点击快速生成今日简报
+              </div>
             </div>
+          </div>
+        </section>
 
-            {/* 版权信息 */}
-            <div className="text-center text-xs text-muted-foreground py-4">
-              <p>资讯聚合平台 · 智能新闻助手</p>
-              <p className="mt-1">© 2024 All Rights Reserved</p>
-            </div>
+        {(isSearching || searchResult) && (
+          <section className="space-y-6 animate-fade-in">
+            {isSearching && (
+              <div className="progress-card">
+                <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
+                  <span>{progressStage?.label || '正在处理'}</span>
+                  <span>{Math.round(progressValue * 100)}%</span>
+                </div>
+                <div className="progress-track">
+                  <div className="progress-fill" style={{ width: `${progressValue * 100}%` }} />
+                </div>
+                <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                  {[
+                    { stage: 'intent', label: '解析意图' },
+                    { stage: 'sources', label: '抓取资讯' },
+                    { stage: 'dedupe', label: '去重整理' },
+                    { stage: 'summary', label: '生成简报' },
+                  ].map((item) => (
+                    <div
+                      key={item.stage}
+                      className={`stage-pill ${progressStage?.stage === item.stage ? 'stage-pill-active' : ''}`}
+                    >
+                      {item.label}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
-            {/* 源管理入口 */}
-            <button
-              onClick={() => setShowSourceManager(true)}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-card hover:bg-accent rounded-xl border transition-colors"
-            >
-              <Settings2 size={18} className="text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">管理新闻源</span>
-            </button>
-          </aside>
-        </div>
+            {searchError && (
+              <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                {searchError}
+              </div>
+            )}
+
+            {isSearching ? (
+              <AISummary summary="" keyword="搜索中" isLoading={true} />
+            ) : searchResult && (
+              <>
+                <AISummary summary={searchResult.aiSummary} keyword={searchResult.keyword} />
+
+                <div className="mt-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Search className="w-5 h-5 text-primary" />
+                    <h2 className="font-serif text-lg font-bold text-foreground">
+                      「{searchResult.keyword}」相关资讯
+                    </h2>
+                    <span className="text-sm text-muted-foreground">
+                      共 {searchResult.news.length} 条
+                    </span>
+                  </div>
+
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {searchResult.news.map(news => (
+                      <NewsCard key={news.id} news={news} />
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+          </section>
+        )}
       </main>
 
       {/* 源管理弹窗 */}

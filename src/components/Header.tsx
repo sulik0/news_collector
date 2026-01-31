@@ -1,23 +1,25 @@
-import { Search, Newspaper, Sparkles, TrendingUp, Clock, ChevronRight } from 'lucide-react'
+import { Search, Newspaper, Sparkles, TrendingUp, Clock, ChevronRight, Settings2 } from 'lucide-react'
 import { cn } from '../lib/utils'
 
 interface HeaderProps {
-  onSearch: (keyword: string) => void
-  isSearching: boolean
+  onSearch?: (keyword: string) => void
+  isSearching?: boolean
+  showSearch?: boolean
+  onOpenSources?: () => void
 }
 
-export function Header({ onSearch, isSearching }: HeaderProps) {
+export function Header({ onSearch, isSearching = false, showSearch = true, onOpenSources }: HeaderProps) {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
     const keyword = formData.get('keyword') as string
     if (keyword.trim()) {
-      onSearch(keyword.trim())
+      onSearch?.(keyword.trim())
     }
   }
 
   return (
-    <header className="sticky top-0 z-50 bg-card shadow-nav">
+    <header className="sticky top-0 z-50 bg-card/80 backdrop-blur shadow-nav">
       {/* 顶部红色条 */}
       <div className="h-1 bg-gradient-to-r from-primary via-accent to-secondary" />
       
@@ -36,42 +38,53 @@ export function Header({ onSearch, isSearching }: HeaderProps) {
           </div>
 
           {/* 搜索框 */}
-          <form onSubmit={handleSubmit} className="flex-1 max-w-xl mx-8">
-            <div className="relative">
-              <input
-                type="text"
-                name="keyword"
-                placeholder="输入关键词搜索资讯，AI为您智能总结..."
-                className="search-input pl-12 pr-24"
-                disabled={isSearching}
-              />
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <button
-                type="submit"
-                disabled={isSearching}
-                className={cn(
-                  "absolute right-2 top-1/2 -translate-y-1/2 btn-primary py-2 px-4 text-sm",
-                  isSearching && "opacity-70 cursor-not-allowed"
-                )}
-              >
-                {isSearching ? (
-                  <span className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 animate-pulse" />
-                    搜索中
-                  </span>
-                ) : (
-                  '搜索'
-                )}
-              </button>
-            </div>
-          </form>
+          {showSearch && (
+            <form onSubmit={handleSubmit} className="flex-1 max-w-xl mx-8 hidden lg:block">
+              <div className="relative">
+                <input
+                  type="text"
+                  name="keyword"
+                  placeholder="输入关键词搜索资讯，AI为您智能总结..."
+                  className="search-input pl-12 pr-24"
+                  disabled={isSearching}
+                />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <button
+                  type="submit"
+                  disabled={isSearching}
+                  className={cn(
+                    "absolute right-2 top-1/2 -translate-y-1/2 btn-primary py-2 px-4 text-sm",
+                    isSearching && "opacity-70 cursor-not-allowed"
+                  )}
+                >
+                  {isSearching ? (
+                    <span className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 animate-pulse" />
+                      搜索中
+                    </span>
+                  ) : (
+                    '搜索'
+                  )}
+                </button>
+              </div>
+            </form>
+          )}
 
           {/* 右侧信息 */}
-          <div className="hidden md:flex items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
               <Clock className="w-4 h-4" />
               <span>{new Date().toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' })}</span>
             </div>
+            {onOpenSources && (
+              <button
+                onClick={onOpenSources}
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-full border border-border bg-card hover:bg-muted transition-colors text-xs"
+              >
+                <Settings2 className="w-4 h-4" />
+                管理新闻源
+              </button>
+            )}
           </div>
         </div>
 

@@ -1,1 +1,392 @@
-[]
+[
+  {
+    "id": "seed-bbc-world",
+    "name": "BBC World",
+    "type": "rss",
+    "enabled": true,
+    "category": "world",
+    "config": {
+      "url": "http://feeds.bbci.co.uk/news/world/rss.xml",
+      "itemLimit": 20
+    },
+    "createdAt": "2026-01-31T00:00:00.000Z",
+    "updatedAt": "2026-01-31T00:00:00.000Z"
+  },
+  {
+    "id": "seed-bbc-tech",
+    "name": "BBC Technology",
+    "type": "rss",
+    "enabled": true,
+    "category": "tech",
+    "config": {
+      "url": "http://feeds.bbci.co.uk/news/technology/rss.xml",
+      "itemLimit": 20
+    },
+    "createdAt": "2026-01-31T00:00:00.000Z",
+    "updatedAt": "2026-01-31T00:00:00.000Z"
+  },
+  {
+    "id": "seed-reuters-top",
+    "name": "Reuters Top News",
+    "type": "rss",
+    "enabled": true,
+    "category": "world",
+    "config": {
+      "url": "https://feeds.reuters.com/reuters/topNews",
+      "itemLimit": 20
+    },
+    "createdAt": "2026-01-31T00:00:00.000Z",
+    "updatedAt": "2026-01-31T00:00:00.000Z"
+  },
+  {
+    "id": "seed-nyt-world",
+    "name": "NYTimes World",
+    "type": "rss",
+    "enabled": true,
+    "category": "world",
+    "config": {
+      "url": "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
+      "itemLimit": 20
+    },
+    "createdAt": "2026-01-31T00:00:00.000Z",
+    "updatedAt": "2026-01-31T00:00:00.000Z"
+  },
+  {
+    "id": "seed-guardian-world",
+    "name": "The Guardian World",
+    "type": "rss",
+    "enabled": true,
+    "category": "world",
+    "config": {
+      "url": "https://www.theguardian.com/world/rss",
+      "itemLimit": 20
+    },
+    "createdAt": "2026-01-31T00:00:00.000Z",
+    "updatedAt": "2026-01-31T00:00:00.000Z"
+  },
+  {
+    "id": "seed-cnn-top",
+    "name": "CNN Top Stories",
+    "type": "rss",
+    "enabled": true,
+    "category": "world",
+    "config": {
+      "url": "http://rss.cnn.com/rss/edition.rss",
+      "itemLimit": 20
+    },
+    "createdAt": "2026-01-31T00:00:00.000Z",
+    "updatedAt": "2026-01-31T00:00:00.000Z"
+  },
+  {
+    "id": "seed-npr-news",
+    "name": "NPR News",
+    "type": "rss",
+    "enabled": true,
+    "category": "society",
+    "config": {
+      "url": "https://feeds.npr.org/1001/rss.xml",
+      "itemLimit": 20
+    },
+    "createdAt": "2026-01-31T00:00:00.000Z",
+    "updatedAt": "2026-01-31T00:00:00.000Z"
+  },
+  {
+    "id": "seed-techcrunch",
+    "name": "TechCrunch",
+    "type": "rss",
+    "enabled": true,
+    "category": "tech",
+    "config": {
+      "url": "https://techcrunch.com/feed/",
+      "itemLimit": 20
+    },
+    "createdAt": "2026-01-31T00:00:00.000Z",
+    "updatedAt": "2026-01-31T00:00:00.000Z"
+  },
+  {
+    "id": "seed-theverge",
+    "name": "The Verge",
+    "type": "rss",
+    "enabled": true,
+    "category": "tech",
+    "config": {
+      "url": "https://www.theverge.com/rss/index.xml",
+      "itemLimit": 20
+    },
+    "createdAt": "2026-01-31T00:00:00.000Z",
+    "updatedAt": "2026-01-31T00:00:00.000Z"
+  },
+  {
+    "id": "seed-cnbc",
+    "name": "CNBC Top News",
+    "type": "rss",
+    "enabled": true,
+    "category": "finance",
+    "config": {
+      "url": "https://www.cnbc.com/id/100003114/device/rss/rss.html",
+      "itemLimit": 20
+    },
+    "createdAt": "2026-01-31T00:00:00.000Z",
+    "updatedAt": "2026-01-31T00:00:00.000Z"
+  },
+  {
+    "id": "seed-36kr",
+    "name": "36氪 综合资讯",
+    "type": "rss",
+    "enabled": true,
+    "category": "tech",
+    "config": {
+      "url": "https://36kr.com/feed",
+      "itemLimit": 20
+    },
+    "createdAt": "2026-01-31T00:00:00.000Z",
+    "updatedAt": "2026-01-31T00:00:00.000Z"
+  },
+  {
+    "id": "seed-36kr-flash",
+    "name": "36氪 最新快讯",
+    "type": "rss",
+    "enabled": true,
+    "category": "tech",
+    "config": {
+      "url": "https://36kr.com/feed-newsflash",
+      "itemLimit": 30
+    },
+    "createdAt": "2026-01-31T00:00:00.000Z",
+    "updatedAt": "2026-01-31T00:00:00.000Z"
+  },
+  {
+    "id": "seed-ifanr",
+    "name": "爱范儿 RSS",
+    "type": "rss",
+    "enabled": true,
+    "category": "tech",
+    "config": {
+      "url": "https://www.ifanr.com/feed",
+      "itemLimit": 20
+    },
+    "createdAt": "2026-01-31T00:00:00.000Z",
+    "updatedAt": "2026-01-31T00:00:00.000Z"
+  },
+  {
+    "id": "seed-tencent-domestic",
+    "name": "腾讯新闻 国内",
+    "type": "rss",
+    "enabled": true,
+    "category": "society",
+    "config": {
+      "url": "https://news.qq.com/newsgn/rss_newsgn.xml",
+      "itemLimit": 20
+    },
+    "createdAt": "2026-01-31T00:00:00.000Z",
+    "updatedAt": "2026-01-31T00:00:00.000Z"
+  },
+  {
+    "id": "seed-people-world",
+    "name": "人民网 国际新闻",
+    "type": "rss",
+    "enabled": true,
+    "category": "world",
+    "config": {
+      "url": "http://www.people.com.cn/rss/world.xml",
+      "itemLimit": 20
+    },
+    "createdAt": "2026-01-31T00:00:00.000Z",
+    "updatedAt": "2026-01-31T00:00:00.000Z"
+  },
+  {
+    "id": "seed-people-legal",
+    "name": "人民网 法治新闻",
+    "type": "rss",
+    "enabled": true,
+    "category": "society",
+    "config": {
+      "url": "http://www.people.com.cn/rss/legal.xml",
+      "itemLimit": 20
+    },
+    "createdAt": "2026-01-31T00:00:00.000Z",
+    "updatedAt": "2026-01-31T00:00:00.000Z"
+  },
+  {
+    "id": "seed-people-politics",
+    "name": "人民网 时政新闻",
+    "type": "rss",
+    "enabled": true,
+    "category": "society",
+    "config": {
+      "url": "http://www.people.com.cn/rss/politics.xml",
+      "itemLimit": 20
+    },
+    "createdAt": "2026-01-31T00:00:00.000Z",
+    "updatedAt": "2026-01-31T00:00:00.000Z"
+  },
+  {
+    "id": "seed-people-haixia",
+    "name": "人民网 台港澳新闻",
+    "type": "rss",
+    "enabled": true,
+    "category": "world",
+    "config": {
+      "url": "http://www.people.com.cn/rss/haixia.xml",
+      "itemLimit": 20
+    },
+    "createdAt": "2026-01-31T00:00:00.000Z",
+    "updatedAt": "2026-01-31T00:00:00.000Z"
+  },
+  {
+    "id": "seed-people-military",
+    "name": "人民网 军事新闻",
+    "type": "rss",
+    "enabled": true,
+    "category": "world",
+    "config": {
+      "url": "http://www.people.com.cn/rss/military.xml",
+      "itemLimit": 20
+    },
+    "createdAt": "2026-01-31T00:00:00.000Z",
+    "updatedAt": "2026-01-31T00:00:00.000Z"
+  },
+  {
+    "id": "seed-people-all",
+    "name": "人民网 全部新闻",
+    "type": "rss",
+    "enabled": true,
+    "category": "world",
+    "config": {
+      "url": "http://www.people.com.cn/rss/ywkx.xml",
+      "itemLimit": 30
+    },
+    "createdAt": "2026-01-31T00:00:00.000Z",
+    "updatedAt": "2026-01-31T00:00:00.000Z"
+  },
+  {
+    "id": "seed-chinadaily-bizchina",
+    "name": "中国日报 BizChina",
+    "type": "rss",
+    "enabled": true,
+    "category": "finance",
+    "config": {
+      "url": "http://www.chinadaily.com.cn/rss/bizchina_rss.xml",
+      "itemLimit": 20
+    },
+    "createdAt": "2026-01-31T00:00:00.000Z",
+    "updatedAt": "2026-01-31T00:00:00.000Z"
+  },
+  {
+    "id": "seed-chinadaily-cndy",
+    "name": "中国日报 全站要闻",
+    "type": "rss",
+    "enabled": true,
+    "category": "world",
+    "config": {
+      "url": "http://www.chinadaily.com.cn/rss/cndy_rss.xml",
+      "itemLimit": 20
+    },
+    "createdAt": "2026-01-31T00:00:00.000Z",
+    "updatedAt": "2026-01-31T00:00:00.000Z"
+  },
+  {
+    "id": "seed-chinaorg-environment",
+    "name": "中国网 Environment",
+    "type": "rss",
+    "enabled": true,
+    "category": "society",
+    "config": {
+      "url": "http://www.china.org.cn/rss/1201726.xml",
+      "itemLimit": 20
+    },
+    "createdAt": "2026-01-31T00:00:00.000Z",
+    "updatedAt": "2026-01-31T00:00:00.000Z"
+  },
+  {
+    "id": "seed-chinaorg-sports",
+    "name": "中国网 Sports",
+    "type": "rss",
+    "enabled": true,
+    "category": "society",
+    "config": {
+      "url": "http://www.china.org.cn/rss/1214465.xml",
+      "itemLimit": 20
+    },
+    "createdAt": "2026-01-31T00:00:00.000Z",
+    "updatedAt": "2026-01-31T00:00:00.000Z"
+  },
+  {
+    "id": "seed-chinadaily-china",
+    "name": "中国日报 China News",
+    "type": "rss",
+    "enabled": true,
+    "category": "world",
+    "config": {
+      "url": "http://www.chinadaily.com.cn/rss/china_rss.xml",
+      "itemLimit": 20
+    },
+    "createdAt": "2026-01-31T00:00:00.000Z",
+    "updatedAt": "2026-01-31T00:00:00.000Z"
+  },
+  {
+    "id": "seed-chinadaily-world",
+    "name": "中国日报 World News",
+    "type": "rss",
+    "enabled": true,
+    "category": "world",
+    "config": {
+      "url": "http://www.chinadaily.com.cn/rss/world_rss.xml",
+      "itemLimit": 20
+    },
+    "createdAt": "2026-01-31T00:00:00.000Z",
+    "updatedAt": "2026-01-31T00:00:00.000Z"
+  },
+  {
+    "id": "seed-chinaorg-top",
+    "name": "中国网 Top News",
+    "type": "rss",
+    "enabled": true,
+    "category": "world",
+    "config": {
+      "url": "http://www.china.org.cn/rss/1185842.xml",
+      "itemLimit": 20
+    },
+    "createdAt": "2026-01-31T00:00:00.000Z",
+    "updatedAt": "2026-01-31T00:00:00.000Z"
+  },
+  {
+    "id": "seed-chinaorg-business",
+    "name": "中国网 Business",
+    "type": "rss",
+    "enabled": true,
+    "category": "finance",
+    "config": {
+      "url": "http://www.china.org.cn/rss/1216549.xml",
+      "itemLimit": 20
+    },
+    "createdAt": "2026-01-31T00:00:00.000Z",
+    "updatedAt": "2026-01-31T00:00:00.000Z"
+  },
+  {
+    "id": "seed-ftchinese-daily",
+    "name": "FT中文网 每日更新",
+    "type": "rss",
+    "enabled": true,
+    "category": "finance",
+    "config": {
+      "url": "https://www1.ftchinese.com/rss/feed",
+      "itemLimit": 20
+    },
+    "createdAt": "2026-01-31T00:00:00.000Z",
+    "updatedAt": "2026-01-31T00:00:00.000Z"
+  },
+  {
+    "id": "seed-ftchinese-focus",
+    "name": "FT中文网 今日焦点",
+    "type": "rss",
+    "enabled": true,
+    "category": "finance",
+    "config": {
+      "url": "https://www1.ftchinese.com/rss/news",
+      "itemLimit": 20
+    },
+    "createdAt": "2026-01-31T00:00:00.000Z",
+    "updatedAt": "2026-01-31T00:00:00.000Z"
+  }
+]
