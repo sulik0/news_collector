@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { X } from 'lucide-react'
 import {
   CustomSource,
@@ -45,9 +45,11 @@ export function SourceForm({ source, onSubmit, onCancel }: SourceFormProps) {
   const [category, setCategory] = useState('tech')
   const [enabled, setEnabled] = useState(true)
   const [config, setConfig] = useState<RSSConfig | ScraperConfig | WechatConfig>(defaultRSSConfig)
+  const skipNextTypeReset = useRef(false)
 
   useEffect(() => {
     if (source) {
+      skipNextTypeReset.current = true
       setName(source.name)
       setType(source.type)
       setCategory(source.category)
@@ -57,19 +59,21 @@ export function SourceForm({ source, onSubmit, onCancel }: SourceFormProps) {
   }, [source])
 
   useEffect(() => {
-    if (!source) {
-      // 切换类型时重置配置
-      switch (type) {
-        case 'rss':
-          setConfig(defaultRSSConfig)
-          break
-        case 'scraper':
-          setConfig(defaultScraperConfig)
-          break
-        case 'wechat':
-          setConfig(defaultWechatConfig)
-          break
-      }
+    if (skipNextTypeReset.current) {
+      skipNextTypeReset.current = false
+      return
+    }
+    // 切换类型时重置配置
+    switch (type) {
+      case 'rss':
+        setConfig(defaultRSSConfig)
+        break
+      case 'scraper':
+        setConfig(defaultScraperConfig)
+        break
+      case 'wechat':
+        setConfig(defaultWechatConfig)
+        break
     }
   }, [type, source])
 
