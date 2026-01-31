@@ -14,7 +14,7 @@ import { fetchWechat } from './providers/wechat.js'
 import * as sourceService from './services/sourceService.js'
 import { buildIntentPrompt, buildSummaryPrompt } from './prompts.js'
 
-dotenv.config()
+dotenv.config({ path: new URL('./.env', import.meta.url) })
 
 const app = express()
 app.use(cors())
