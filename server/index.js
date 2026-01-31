@@ -26,6 +26,23 @@ const keywordCache = {
   keywords: [],
 }
 
+async function runWithLimit(items, limit, handler) {
+  const results = []
+  let index = 0
+  const workerCount = Math.max(1, Math.min(limit, items.length))
+
+  const workers = Array.from({ length: workerCount }, async () => {
+    while (index < items.length) {
+      const current = items[index]
+      index += 1
+      results.push(await handler(current))
+    }
+  })
+
+  await Promise.allSettled(workers)
+  return results
+}
+
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true })
 })
@@ -39,22 +56,16 @@ app.get('/api/keywords', async (_req, res) => {
 
   try {
     const customSources = await sourceService.getEnabledSources()
-    const results = await Promise.allSettled(
-      customSources.map(async (source) => {
-        try {
-          return await fetchCustomSource(source, { keywords: [] })
-        } catch (error) {
-          console.warn(`Keywords source failed: ${source.name || source.id}`, error?.message || error)
-          return []
-        }
-      })
-    )
+    const results = await runWithLimit(customSources, 4, async (source) => {
+      try {
+        return await fetchCustomSource(source, { keywords: [] })
+      } catch (error) {
+        console.warn(`Keywords source failed: ${source.name || source.id}`, error?.message || error)
+        return []
+      }
+    })
 
-    const items = results
-      .filter((result) => result.status === 'fulfilled')
-      .map((result) => result.value)
-      .flat()
-      .slice(0, 120)
+    const items = results.flat().slice(0, 120)
 
     const keywords = buildTrendingKeywords(items, 8)
     if (keywords.length === 0) {
@@ -206,26 +217,21 @@ async function generateBriefing(userInput, onStage) {
     })
   )
 
-  const customResults = await Promise.allSettled(
-    customSources.map(async (source) => {
-      try {
-        return await fetchCustomSource(source, searchPayload)
-      } catch (error) {
-        console.warn(`Custom source failed: ${source.name || source.id}`, error?.message || error)
-        return []
-      }
-    })
-  )
+  const customResults = await runWithLimit(customSources, 4, async (source) => {
+    try {
+      return await fetchCustomSource(source, searchPayload)
+    } catch (error) {
+      console.warn(`Custom source failed: ${source.name || source.id}`, error?.message || error)
+      return []
+    }
+  })
 
   const flattenedBuiltin = builtinResults
     .filter((result) => result.status === 'fulfilled')
     .map((result) => result.value)
     .flat()
 
-  const flattenedCustom = customResults
-    .filter((result) => result.status === 'fulfilled')
-    .map((result) => result.value)
-    .flat()
+  const flattenedCustom = customResults.flat()
 
   onStage?.({ stage: 'dedupe', label: '去重整理', progress: 0.75 })
   const combined = dedupeNews([

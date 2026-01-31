@@ -1,9 +1,17 @@
 import Parser from 'rss-parser'
 import { normalizeItem } from '../utils/normalize.js'
 import { buildSearchTerms, matchesTerms } from '../utils/filter.js'
+import { createRetryingFetch } from '../utils/http.js'
+
+const retryingFetch = createRetryingFetch({
+  timeoutMs: 20000,
+  retries: 2,
+  backoffMs: 500,
+})
 
 const parser = new Parser({
-  timeout: 10000,
+  timeout: 20000,
+  customFetch: retryingFetch,
   headers: {
     'User-Agent': 'NewsCollector/1.0',
     'Accept': 'application/rss+xml, application/xml, text/xml, application/atom+xml'
@@ -26,7 +34,18 @@ export async function fetchRSS(source, searchPayload = {}) {
   }
 
   try {
-    const feed = await parser.parseURL(url)
+    const res = await retryingFetch(url, {
+      headers: {
+        'User-Agent': 'NewsCollector/1.0',
+        'Accept': 'application/rss+xml, application/xml, text/xml, application/atom+xml',
+      }
+    })
+    const xml = await res.text()
+    if (!/<rss|<feed|<rdf/i.test(xml)) {
+      console.error(`RSS fetch failed [${source.name}]: non-RSS response`)
+      return []
+    }
+    const feed = await parser.parseString(xml)
     const items = feed.items || []
     const terms = buildSearchTerms(searchPayload)
     const filtered = terms.length === 0

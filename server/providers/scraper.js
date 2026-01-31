@@ -1,6 +1,7 @@
 import * as cheerio from 'cheerio'
 import { normalizeItem } from '../utils/normalize.js'
 import { buildSearchTerms, matchesTerms } from '../utils/filter.js'
+import { createRetryingFetch } from '../utils/http.js'
 
 export async function fetchScraper(source, searchPayload = {}) {
   const { url, selectors, baseUrl } = source.config || {}
@@ -11,18 +12,19 @@ export async function fetchScraper(source, searchPayload = {}) {
   }
 
   try {
-    const res = await fetch(url, {
+    const retryingFetch = createRetryingFetch({
+      timeoutMs: 20000,
+      retries: 2,
+      backoffMs: 500,
+    })
+
+    const res = await retryingFetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8'
       }
     })
-
-    if (!res.ok) {
-      console.error(`Scraper fetch failed [${source.name}]: HTTP ${res.status}`)
-      return []
-    }
 
     const html = await res.text()
     const $ = cheerio.load(html)
